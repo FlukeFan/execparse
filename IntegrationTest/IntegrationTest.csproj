@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="CustomBuild" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3C0C190B-C5EA-4855-82D9-09E6C6C4D466}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IntegrationTest</RootNamespace>
+    <AssemblyName>IntegrationTest</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <UsingTask AssemblyFile="..\bin\Release\ExecParse.dll" TaskName="ExecParse.ExecParse" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ItemGroup>
+    <Content Include="SubFolder\MyCustomOutput.txt" />
+  </ItemGroup>
+  <PropertyGroup>
+    <Error>
+      <SearchRegex>s1</SearchRegex>
+    </Error>
+    <Error>
+      <SearchRegex>s2</SearchRegex>
+    </Error>
+    <Warning>
+      <SearchRegex>
+      </SearchRegex>
+    </Warning>
+    <Message>
+      <SearchRegex>
+      </SearchRegex>
+    </Message>
+  </PropertyGroup>
+  <Target Name="CustomBuild">
+    <Message Text="Start custom build ..." />
+    <ExecParse Command="type SubFolder\MyCustomOutput.txt" ExecParseConfiguration="$(Error)"/>
+  </Target>
+</Project>
