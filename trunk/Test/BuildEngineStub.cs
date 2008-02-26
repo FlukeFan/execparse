@@ -10,6 +10,7 @@ namespace ExecParse.Test
     {
 
         public List<string> _errors = new List<string>();
+        public List<string> _warnings = new List<string>();
 
         public bool BuildProjectFile(string projectFileName, string[] targetNames, System.Collections.IDictionary globalProperties, System.Collections.IDictionary targetOutputs)
         {
@@ -57,12 +58,21 @@ namespace ExecParse.Test
 
         public void LogWarningEvent(BuildWarningEventArgs e)
         {
-            throw new Exception("The method or operation is not implemented.");
+            _warnings.Add(
+                "Message='" + e.Message + "', "
+                + "Code='" + e.Code + "', "
+                + "File='" + e.File + "', "
+                + "HelpKeyword='" + e.HelpKeyword + "', "
+                + "Subcategory='" + e.Subcategory + "', "
+                + "LineNumber=" + e.LineNumber.ToString() + ", "
+                + "EndLineNumber=" + e.EndLineNumber.ToString() + ", "
+                + "ColumnNumber=" + e.ColumnNumber.ToString() + ", "
+                + "EndColumnNumber=" + e.EndColumnNumber.ToString());
         }
 
         public string ProjectFileOfTaskNode
         {
-            get { throw new Exception("The method or operation is not implemented."); }
+            get { return "BuildEngineStub"; }
         }
 
     }
