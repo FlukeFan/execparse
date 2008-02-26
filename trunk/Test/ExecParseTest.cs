@@ -46,5 +46,31 @@ namespace ExecParse.Test
             Assert.AreEqual("Message='my message', Code='5', File='ExecParse.cs', HelpKeyword='banana', Subcategory='Fourth', LineNumber=1, EndLineNumber=2, ColumnNumber=3, EndColumnNumber=0", buildEngine._errors[1]);
         }
 
+        [Test]
+        public void TestErrorMultipleLine()
+        {
+            BuildEngineStub buildEngine = new BuildEngineStub();
+            ExecParse task = new ExecParse();
+            task.BuildEngine = buildEngine;
+
+            task.Configuration = @"
+                <Error>
+                    <Search>fail:[\s\S]*?(\w*) line:</Search>
+                    <Message>$1</Message>
+                </Error>";
+
+            string output =
+                @"First line;
+                Second line fail:ExecParse.cs:line 23
+                Third line:
+                Fourth line fail:ExecParse.cs:line 1 my message endline 2 column1 3 column2 x code 5 keyword banana
+                Fifth line.";
+
+            task.ParseOutput(output);
+
+            Assert.AreEqual(1, buildEngine._errors.Count);
+            Assert.AreEqual("Message='Third', Code='', File='', HelpKeyword='', Subcategory='', LineNumber=0, EndLineNumber=0, ColumnNumber=0, EndColumnNumber=0", buildEngine._errors[0]);
+        }
+
     }
 }
