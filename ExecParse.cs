@@ -12,6 +12,17 @@ namespace ExecParse
     public class ExecParse : Exec
     {
 
+        private delegate void ComplexLog(   string          subcategory,
+                                            string          errorCode,
+                                            string          helpKeyword,
+                                            string          file,
+                                            int             lineNumber,
+                                            int             columnNumber,
+                                            int             endLineNumber,
+                                            int             endColumnNumber,
+                                            string          message,
+                                            params object[] messageArgs);
+
         StringBuilder   _outputBuilder;
         string          _output;
         string          _configuration;
@@ -57,36 +68,36 @@ namespace ExecParse
             return (replacement == null) ? null : replacement.InnerText;
         }
 
-        private void ParseErrors()
+        private void ParseComplexElement(string elementName, ComplexLog log)
         {
-            XmlNodeList errors = _xmlConfiguration.SelectNodes("//Error");
-            foreach (XmlElement error in errors)
+            XmlNodeList elements = _xmlConfiguration.SelectNodes("//" + elementName);
+            foreach (XmlElement element in elements)
             {
-                Regex search = new Regex(error.SelectSingleNode("Search").InnerText);
-                string messageReplacement = ExtractReplacement(error, "Message");
-                string codeReplacement = ExtractReplacement(error, "Code");
-                string fileReplacement = ExtractReplacement(error, "File");
-                string helpKeywordReplacement = ExtractReplacement(error, "HelpKeyword");
-                string subcategoryReplacement = ExtractReplacement(error, "Subcategory");
-                string lineNumberReplacement = ExtractReplacement(error, "LineNumber");
-                string endLineNumberReplacement = ExtractReplacement(error, "EndLineNumber");
-                string columnNumberReplacement = ExtractReplacement(error, "ColumnNumber");
-                string endColumnNumberReplacement = ExtractReplacement(error, "EndColumnNumber");
-                MatchCollection foundErrors = search.Matches(_output);
+                Regex search = new Regex(element.SelectSingleNode("Search").InnerText);
+                string messageReplacement = ExtractReplacement(element, "Message");
+                string codeReplacement = ExtractReplacement(element, "Code");
+                string fileReplacement = ExtractReplacement(element, "File");
+                string helpKeywordReplacement = ExtractReplacement(element, "HelpKeyword");
+                string subcategoryReplacement = ExtractReplacement(element, "Subcategory");
+                string lineNumberReplacement = ExtractReplacement(element, "LineNumber");
+                string endLineNumberReplacement = ExtractReplacement(element, "EndLineNumber");
+                string columnNumberReplacement = ExtractReplacement(element, "ColumnNumber");
+                string endColumnNumberReplacement = ExtractReplacement(element, "EndColumnNumber");
+                MatchCollection matches = search.Matches(_output);
 
-                foreach (Match errorMatch in foundErrors)
+                foreach (Match match in matches)
                 {
-                    string message = (messageReplacement == null) ? string.Empty : search.Replace(errorMatch.Value, messageReplacement);
-                    string code = (codeReplacement == null) ? string.Empty : search.Replace(errorMatch.Value, codeReplacement);
-                    string file = (fileReplacement == null) ? string.Empty : search.Replace(errorMatch.Value, fileReplacement);
-                    string helpKeyword = (helpKeywordReplacement == null) ? string.Empty : search.Replace(errorMatch.Value, helpKeywordReplacement);
-                    string subcategory = (subcategoryReplacement == null) ? string.Empty : search.Replace(errorMatch.Value, subcategoryReplacement);
-                    int lineNumber = (lineNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(errorMatch.Value, lineNumberReplacement));
-                    int endLineNumber = (endLineNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(errorMatch.Value, endLineNumberReplacement));
-                    int columnNumber = (columnNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(errorMatch.Value, columnNumberReplacement));
-                    int endColumnNumber = (endColumnNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(errorMatch.Value, endColumnNumberReplacement));
+                    string message = (messageReplacement == null) ? string.Empty : search.Replace(match.Value, messageReplacement);
+                    string code = (codeReplacement == null) ? string.Empty : search.Replace(match.Value, codeReplacement);
+                    string file = (fileReplacement == null) ? string.Empty : search.Replace(match.Value, fileReplacement);
+                    string helpKeyword = (helpKeywordReplacement == null) ? string.Empty : search.Replace(match.Value, helpKeywordReplacement);
+                    string subcategory = (subcategoryReplacement == null) ? string.Empty : search.Replace(match.Value, subcategoryReplacement);
+                    int lineNumber = (lineNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, lineNumberReplacement));
+                    int endLineNumber = (endLineNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, endLineNumberReplacement));
+                    int columnNumber = (columnNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, columnNumberReplacement));
+                    int endColumnNumber = (endColumnNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, endColumnNumberReplacement));
 
-                    Log.LogError(subcategory, code, helpKeyword, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message);
+                    log(subcategory, code, helpKeyword, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message);
                 }
             }
         }
@@ -96,7 +107,8 @@ namespace ExecParse
             _output = outputFromExecution;
             LoadConfiguration();
 
-            ParseErrors();
+            ParseComplexElement("Error", new ComplexLog(Log.LogError));
+            ParseComplexElement("Warning", new ComplexLog(Log.LogWarning));
         }
 
     }

@@ -69,7 +69,33 @@ namespace ExecParse.Test
             task.ParseOutput(output);
 
             Assert.AreEqual(1, buildEngine._errors.Count);
+            Assert.AreEqual(0, buildEngine._warnings.Count);
             Assert.AreEqual("Message='Third', Code='', File='', HelpKeyword='', Subcategory='', LineNumber=0, EndLineNumber=0, ColumnNumber=0, EndColumnNumber=0", buildEngine._errors[0]);
+        }
+
+        [Test]
+        public void TestWarning()
+        {
+            BuildEngineStub buildEngine = new BuildEngineStub();
+            ExecParse task = new ExecParse();
+            task.BuildEngine = buildEngine;
+
+            task.Configuration = @"
+                <Warning>
+                    <Search>fail:([\s\S]*?):</Search>
+                    <Message>$1</Message>
+                </Warning>";
+
+            string output =
+                @"First line;
+                Second line fail:ExecParse.cs:line 23
+                Third line.";
+
+            task.ParseOutput(output);
+
+            Assert.AreEqual(0, buildEngine._errors.Count);
+            Assert.AreEqual(1, buildEngine._warnings.Count);
+            Assert.AreEqual("Message='ExecParse.cs', Code='', File='BuildEngineStub', HelpKeyword='', Subcategory='', LineNumber=0, EndLineNumber=0, ColumnNumber=0, EndColumnNumber=0", buildEngine._warnings[0]);
         }
 
     }
