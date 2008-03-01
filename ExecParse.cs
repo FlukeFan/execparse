@@ -44,7 +44,7 @@ namespace ExecParse
         {
             _outputBuilder = new StringBuilder();
             bool pass = base.Execute();
-            
+
             ParseOutput(_outputBuilder.ToString());
             return pass;
         }
@@ -52,7 +52,9 @@ namespace ExecParse
         private void LoadConfiguration()
         {
             _xmlConfiguration = new XmlDocument();
-            _xmlConfiguration.LoadXml("<xml>" + _configuration + "</xml>");
+            Regex namespaceFinder = new Regex("xmlns(:[^=]*?)?=['\"][^'\"]*?['\"]");
+            string configurationWithoutNamespaces = namespaceFinder.Replace(_configuration, "");
+            _xmlConfiguration.LoadXml("<xml>" + configurationWithoutNamespaces + "</xml>");
         }
 
         private int ConvertToInt32OrZero(string potentialNumber)
@@ -61,7 +63,7 @@ namespace ExecParse
             return int.TryParse(potentialNumber, out convertedInt32) ? convertedInt32 : 0;
         }
 
-        private string ExtractReplacement(XmlElement xmlElement,
+        private string ExtractReplacement(  XmlElement  xmlElement,
                                             string      nodeName)
         {
             XmlNode replacement = xmlElement.SelectSingleNode(nodeName);
@@ -96,6 +98,13 @@ namespace ExecParse
                     int endLineNumber = (endLineNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, endLineNumberReplacement));
                     int columnNumber = (columnNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, columnNumberReplacement));
                     int endColumnNumber = (endColumnNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, endColumnNumberReplacement));
+
+                    // if we have a file and a line-number, but no column number, default the column to zero
+                    //  so the IDE will auto-jump to the line in the file
+                    if (!string.IsNullOrEmpty(file) && (lineNumber != 0) && (columnNumber == 0))
+                    {
+                        columnNumber = 1;
+                    }
 
                     log(subcategory, code, helpKeyword, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message);
                 }

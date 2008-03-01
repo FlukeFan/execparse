@@ -41,23 +41,29 @@
     <Content Include="SubFolder\MyCustomOutput.txt" />
   </ItemGroup>
   <PropertyGroup>
-    <Error>
-      <SearchRegex>s1</SearchRegex>
-    </Error>
-    <Error>
-      <SearchRegex>s2</SearchRegex>
-    </Error>
-    <Warning>
-      <SearchRegex>
-      </SearchRegex>
-    </Warning>
-    <Message>
-      <SearchRegex>
-      </SearchRegex>
-    </Message>
+      <ExecParseConfiguration>
+        <Error>
+          <Search>myerror (\d): line (\d)?</Search>
+          <Message>error $1</Message>
+          <File>SubFolder/MyCustomOutput.txt</File>
+          <LineNumber>$2</LineNumber>
+        </Error>
+        <Warning>
+          <Search>mywarning (\d): line (\d)?</Search>
+          <Message>warning $1</Message>
+          <File>SubFolder/MyCustomOutput.txt</File>
+          <LineNumber>$2</LineNumber>
+          <ColumnNumber>19</ColumnNumber>
+        </Warning>
+        <Message>
+          <Search>mymessage: (.*?)\r</Search>
+          <Message>mesage - '$1'</Message>
+          <Importance>High</Importance>
+        </Message>
+      </ExecParseConfiguration>
   </PropertyGroup>
   <Target Name="CustomBuild">
     <Message Text="Start custom build ..." />
-    <ExecParse Command="type SubFolder\MyCustomOutput.txt" Configuration="$(Error)"/>
+    <ExecParse Command="type SubFolder\MyCustomOutput.txt" Configuration="$(ExecParseConfiguration)"/>
   </Target>
 </Project>
