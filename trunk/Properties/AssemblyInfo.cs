@@ -6,7 +6,16 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("ExecParse")]
-[assembly: AssemblyDescription("broloco ExecParse - a custom MSBuild task that parses the standard output")]
+
+[assembly: AssemblyDescription(
+@"broloco ExecParse - a custom MSBuild task that parses the standard output
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0")]
+
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("broloco")]
 [assembly: AssemblyProduct("ExecParse")]

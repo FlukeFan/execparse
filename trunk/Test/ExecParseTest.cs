@@ -42,6 +42,8 @@ namespace ExecParse.Test
             task.ParseOutput(output);
 
             Assert.AreEqual(2, buildEngine._errors.Count);
+            Assert.AreEqual(0, buildEngine._warnings.Count);
+            Assert.AreEqual(0, buildEngine._messages.Count);
             Assert.AreEqual("Message='', Code='', File='ExecParse.cs', HelpKeyword='', Subcategory='Second', LineNumber=23, EndLineNumber=0, ColumnNumber=0, EndColumnNumber=0", buildEngine._errors[0]);
             Assert.AreEqual("Message='my message', Code='5', File='ExecParse.cs', HelpKeyword='banana', Subcategory='Fourth', LineNumber=1, EndLineNumber=2, ColumnNumber=3, EndColumnNumber=0", buildEngine._errors[1]);
         }
@@ -70,7 +72,39 @@ namespace ExecParse.Test
 
             Assert.AreEqual(1, buildEngine._errors.Count);
             Assert.AreEqual(0, buildEngine._warnings.Count);
+            Assert.AreEqual(0, buildEngine._messages.Count);
             Assert.AreEqual("Message='Third', Code='', File='', HelpKeyword='', Subcategory='', LineNumber=0, EndLineNumber=0, ColumnNumber=0, EndColumnNumber=0", buildEngine._errors[0]);
+        }
+
+        [Test]
+        public void TestMultipleErrorSearch()
+        {
+            BuildEngineStub buildEngine = new BuildEngineStub();
+            ExecParse task = new ExecParse();
+            task.BuildEngine = buildEngine;
+
+            task.Configuration = @"
+                <Error>
+                    <Search>line (\d):</Search>
+                    <Message>message search 1 = $1</Message>
+                </Error>
+                <Error>
+                    <Search>(\d) line:</Search>
+                    <Message>message search 2 = $1</Message>
+                </Error>";
+
+            string output =
+                @"line 1:
+                2 line:
+                Third line.";
+
+            task.ParseOutput(output);
+
+            Assert.AreEqual(2, buildEngine._errors.Count);
+            Assert.AreEqual(0, buildEngine._warnings.Count);
+            Assert.AreEqual(0, buildEngine._messages.Count);
+            Assert.AreEqual("Message='message search 1 = 1', Code='', File='', HelpKeyword='', Subcategory='', LineNumber=0, EndLineNumber=0, ColumnNumber=0, EndColumnNumber=0", buildEngine._errors[0]);
+            Assert.AreEqual("Message='message search 2 = 2', Code='', File='', HelpKeyword='', Subcategory='', LineNumber=0, EndLineNumber=0, ColumnNumber=0, EndColumnNumber=0", buildEngine._errors[1]);
         }
 
         [Test]
@@ -95,7 +129,66 @@ namespace ExecParse.Test
 
             Assert.AreEqual(0, buildEngine._errors.Count);
             Assert.AreEqual(1, buildEngine._warnings.Count);
+            Assert.AreEqual(0, buildEngine._messages.Count);
             Assert.AreEqual("Message='ExecParse.cs', Code='', File='BuildEngineStub', HelpKeyword='', Subcategory='', LineNumber=0, EndLineNumber=0, ColumnNumber=0, EndColumnNumber=0", buildEngine._warnings[0]);
+        }
+
+        [Test]
+        public void TestMessage()
+        {
+            BuildEngineStub buildEngine = new BuildEngineStub();
+            ExecParse task = new ExecParse();
+            task.BuildEngine = buildEngine;
+
+            task.Configuration = @"
+                <Message>
+                    <Search>fail:([\s\S]*?):</Search>
+                    <Message>$1</Message>
+                    <Importance>high</Importance>
+                </Message>";
+
+            string output =
+                @"First line;
+                Second line fail:ExecParse.cs:line 23
+                Third line.";
+
+            task.ParseOutput(output);
+
+            Assert.AreEqual(0, buildEngine._errors.Count);
+            Assert.AreEqual(0, buildEngine._warnings.Count);
+            Assert.AreEqual(1, buildEngine._messages.Count);
+            Assert.AreEqual("Message='ExecParse.cs', Importance='High'", buildEngine._messages[0]);
+        }
+
+        [Test]
+        public void TestMultipleMessageSearch()
+        {
+            BuildEngineStub buildEngine = new BuildEngineStub();
+            ExecParse task = new ExecParse();
+            task.BuildEngine = buildEngine;
+
+            task.Configuration = @"
+                <Message>
+                    <Search>line (\d):</Search>
+                    <Message>message search 1 = $1</Message>
+                </Message>
+                <Message>
+                    <Search>(\d) line:</Search>
+                    <Message>message search 2 = $1</Message>
+                </Message>";
+
+            string output =
+                @"line 1:
+                2 line:
+                Third line.";
+
+            task.ParseOutput(output);
+
+            Assert.AreEqual(0, buildEngine._errors.Count);
+            Assert.AreEqual(0, buildEngine._warnings.Count);
+            Assert.AreEqual(2, buildEngine._messages.Count);
+            Assert.AreEqual("Message='message search 1 = 1', Importance='Low'", buildEngine._messages[0]);
+            Assert.AreEqual("Message='message search 2 = 2', Importance='Low'", buildEngine._messages[1]);
         }
 
     }
