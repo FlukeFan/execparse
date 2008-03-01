@@ -11,6 +11,7 @@ namespace ExecParse.Test
 
         public List<string> _errors = new List<string>();
         public List<string> _warnings = new List<string>();
+        public List<string> _messages = new List<string>();
 
         public bool BuildProjectFile(string projectFileName, string[] targetNames, System.Collections.IDictionary globalProperties, System.Collections.IDictionary targetOutputs)
         {
@@ -53,7 +54,9 @@ namespace ExecParse.Test
 
         public void LogMessageEvent(BuildMessageEventArgs e)
         {
-            throw new Exception("The method or operation is not implemented.");
+            _messages.Add(
+                "Message='" + e.Message + "', "
+                + "Importance='" + e.Importance.ToString() + "'");
         }
 
         public void LogWarningEvent(BuildWarningEventArgs e)

@@ -70,7 +70,7 @@ namespace ExecParse
 
         private void ParseComplexElement(string elementName, ComplexLog log)
         {
-            XmlNodeList elements = _xmlConfiguration.SelectNodes("//" + elementName);
+            XmlNodeList elements = _xmlConfiguration.SelectNodes("xml/" + elementName);
             foreach (XmlElement element in elements)
             {
                 Regex search = new Regex(element.SelectSingleNode("Search").InnerText);
@@ -102,6 +102,26 @@ namespace ExecParse
             }
         }
 
+        private void ParseMessages()
+        {
+            XmlNodeList elements = _xmlConfiguration.SelectNodes("xml/Message");
+            foreach (XmlElement element in elements)
+            {
+                Regex search = new Regex(element.SelectSingleNode("Search").InnerText);
+                string messageReplacement = ExtractReplacement(element, "Message");
+                string importanceReplacement = ExtractReplacement(element, "Importance");
+                MatchCollection matches = search.Matches(_output);
+
+                foreach (Match match in matches)
+                {
+                    string message = (messageReplacement == null) ? string.Empty : search.Replace(match.Value, messageReplacement);
+                    MessageImportance importance = string.IsNullOrEmpty(importanceReplacement) ? MessageImportance.Low : (MessageImportance)Enum.Parse(typeof(MessageImportance), search.Replace(match.Value, importanceReplacement), true);
+
+                    Log.LogMessage(importance, message);
+                }
+            }
+        }
+
         public void ParseOutput(string outputFromExecution)
         {
             _output = outputFromExecution;
@@ -109,6 +129,7 @@ namespace ExecParse
 
             ParseComplexElement("Error", new ComplexLog(Log.LogError));
             ParseComplexElement("Warning", new ComplexLog(Log.LogWarning));
+            ParseMessages();
         }
 
     }
