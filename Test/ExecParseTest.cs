@@ -244,5 +244,19 @@ namespace ExecParse.Test
             Assert.AreEqual("Message='ExecParse.cs', Importance='Low'", buildEngine._messages[0]);
         }
 
+        [Test]
+        public void TestBlankConfiguration()
+        {
+            BuildEngineStub buildEngine = new BuildEngineStub();
+            ExecParse task = new ExecParse();
+            task.BuildEngine = buildEngine;
+
+            task.ParseOutput("");
+
+            Assert.AreEqual(0, buildEngine._errors.Count);
+            Assert.AreEqual(0, buildEngine._warnings.Count);
+            Assert.AreEqual(0, buildEngine._messages.Count);
+        }
+
     }
 }
