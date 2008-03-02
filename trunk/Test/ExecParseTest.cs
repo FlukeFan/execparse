@@ -258,5 +258,29 @@ namespace ExecParse.Test
             Assert.AreEqual(0, buildEngine._messages.Count);
         }
 
+        [Test]
+        public void TestReplaceSearch()
+        {
+            BuildEngineStub buildEngine = new BuildEngineStub();
+            ExecParse task = new ExecParse();
+            task.BuildEngine = buildEngine;
+
+            task.Configuration = @"
+                <Message>
+                    <Search>(aa)(?=bb)</Search>
+                    <ReplaceSearch>(aa)</ReplaceSearch>
+                    <Message>test $1</Message>
+                </Message>";
+
+            string output = "aabb";
+
+            task.ParseOutput(output);
+
+            Assert.AreEqual(0, buildEngine._errors.Count);
+            Assert.AreEqual(0, buildEngine._warnings.Count);
+            Assert.AreEqual(1, buildEngine._messages.Count);
+            Assert.AreEqual("Message='test aa', Importance='Low'", buildEngine._messages[0]);
+        }
+
     }
 }
