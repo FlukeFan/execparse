@@ -64,7 +64,25 @@ namespace ExecParse
             return int.TryParse(potentialNumber, out convertedInt32) ? convertedInt32 : 0;
         }
 
-        private string ExtractReplacement(  XmlElement  xmlElement,
+        private Regex ExtractSearch(XmlElement configurationElement)
+        {
+            return new Regex(configurationElement.SelectSingleNode("Search").InnerText);
+        }
+
+        private Regex ExtractReplaceSearch(XmlElement configurationElement)
+        {
+            XmlNode replaceSearch = configurationElement.SelectSingleNode("ReplaceSearch");
+            if (replaceSearch != null)
+            {
+                return new Regex(replaceSearch.InnerText);
+            }
+            else
+            {
+                return ExtractSearch(configurationElement);
+            }
+        }
+
+        private string ExtractReplacement(XmlElement xmlElement,
                                             string      nodeName)
         {
             XmlNode replacement = xmlElement.SelectSingleNode(nodeName);
@@ -76,7 +94,8 @@ namespace ExecParse
             XmlNodeList elements = _xmlConfiguration.SelectNodes("xml/" + elementName);
             foreach (XmlElement element in elements)
             {
-                Regex search = new Regex(element.SelectSingleNode("Search").InnerText);
+                Regex search = ExtractSearch(element);
+                Regex replaceSearch = ExtractReplaceSearch(element);
                 string messageReplacement = ExtractReplacement(element, "Message");
                 string codeReplacement = ExtractReplacement(element, "Code");
                 string fileReplacement = ExtractReplacement(element, "File");
@@ -90,15 +109,15 @@ namespace ExecParse
 
                 foreach (Match match in matches)
                 {
-                    string message = (messageReplacement == null) ? string.Empty : search.Replace(match.Value, messageReplacement);
-                    string code = (codeReplacement == null) ? string.Empty : search.Replace(match.Value, codeReplacement);
-                    string file = (fileReplacement == null) ? string.Empty : search.Replace(match.Value, fileReplacement);
-                    string helpKeyword = (helpKeywordReplacement == null) ? string.Empty : search.Replace(match.Value, helpKeywordReplacement);
-                    string subcategory = (subcategoryReplacement == null) ? string.Empty : search.Replace(match.Value, subcategoryReplacement);
-                    int lineNumber = (lineNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, lineNumberReplacement));
-                    int endLineNumber = (endLineNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, endLineNumberReplacement));
-                    int columnNumber = (columnNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, columnNumberReplacement));
-                    int endColumnNumber = (endColumnNumberReplacement == null) ? 0 : ConvertToInt32OrZero(search.Replace(match.Value, endColumnNumberReplacement));
+                    string message = (messageReplacement == null) ? string.Empty : replaceSearch.Replace(match.Value, messageReplacement);
+                    string code = (codeReplacement == null) ? string.Empty : replaceSearch.Replace(match.Value, codeReplacement);
+                    string file = (fileReplacement == null) ? string.Empty : replaceSearch.Replace(match.Value, fileReplacement);
+                    string helpKeyword = (helpKeywordReplacement == null) ? string.Empty : replaceSearch.Replace(match.Value, helpKeywordReplacement);
+                    string subcategory = (subcategoryReplacement == null) ? string.Empty : replaceSearch.Replace(match.Value, subcategoryReplacement);
+                    int lineNumber = (lineNumberReplacement == null) ? 0 : ConvertToInt32OrZero(replaceSearch.Replace(match.Value, lineNumberReplacement));
+                    int endLineNumber = (endLineNumberReplacement == null) ? 0 : ConvertToInt32OrZero(replaceSearch.Replace(match.Value, endLineNumberReplacement));
+                    int columnNumber = (columnNumberReplacement == null) ? 0 : ConvertToInt32OrZero(replaceSearch.Replace(match.Value, columnNumberReplacement));
+                    int endColumnNumber = (endColumnNumberReplacement == null) ? 0 : ConvertToInt32OrZero(replaceSearch.Replace(match.Value, endColumnNumberReplacement));
 
                     // if we have a file and a line-number, but no column number, default the column to zero
                     //  so the IDE will auto-jump to the line in the file
@@ -117,15 +136,16 @@ namespace ExecParse
             XmlNodeList elements = _xmlConfiguration.SelectNodes("xml/Message");
             foreach (XmlElement element in elements)
             {
-                Regex search = new Regex(element.SelectSingleNode("Search").InnerText);
+                Regex search = ExtractSearch(element);
+                Regex replaceSearch = ExtractReplaceSearch(element);
                 string messageReplacement = ExtractReplacement(element, "Message");
                 string importanceReplacement = ExtractReplacement(element, "Importance");
                 MatchCollection matches = search.Matches(_output);
 
                 foreach (Match match in matches)
                 {
-                    string message = (messageReplacement == null) ? string.Empty : search.Replace(match.Value, messageReplacement);
-                    MessageImportance importance = string.IsNullOrEmpty(importanceReplacement) ? MessageImportance.Low : (MessageImportance)Enum.Parse(typeof(MessageImportance), search.Replace(match.Value, importanceReplacement), true);
+                    string message = (messageReplacement == null) ? string.Empty : replaceSearch.Replace(match.Value, messageReplacement);
+                    MessageImportance importance = string.IsNullOrEmpty(importanceReplacement) ? MessageImportance.Low : (MessageImportance)Enum.Parse(typeof(MessageImportance), replaceSearch.Replace(match.Value, importanceReplacement), true);
 
                     Log.LogMessage(importance, message);
                 }
