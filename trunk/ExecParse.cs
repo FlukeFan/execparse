@@ -52,9 +52,10 @@ namespace ExecParse
         private void LoadConfiguration()
         {
             _xmlConfiguration = new XmlDocument();
+            string configurationXml = "<xml>" + _configuration + "</xml>";
             Regex namespaceFinder = new Regex("xmlns(:[^=]*?)?=['\"][^'\"]*?['\"]");
-            string configurationWithoutNamespaces = namespaceFinder.Replace(_configuration, "");
-            _xmlConfiguration.LoadXml("<xml>" + configurationWithoutNamespaces + "</xml>");
+            string configurationWithoutNamespaces = namespaceFinder.Replace(configurationXml, "");
+            _xmlConfiguration.LoadXml(configurationWithoutNamespaces);
         }
 
         private int ConvertToInt32OrZero(string potentialNumber)
