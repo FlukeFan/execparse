@@ -282,5 +282,51 @@ namespace ExecParse.Test
             Assert.AreEqual("Message='test aa', Importance='Low'", buildEngine._messages[0]);
         }
 
+        [Test]
+        public void TestPassFail_NoErrorsOrWarningsLogged()
+        {
+            BuildEngineStub buildEngine = new BuildEngineStub();
+            ExecParse task = new ExecParse();
+            task.BuildEngine = buildEngine;
+
+            Assert.AreEqual(0, buildEngine._errors.Count);
+            Assert.AreEqual(0, buildEngine._warnings.Count);
+
+            task.ErrorCausesFail = false;
+            Assert.AreEqual(true, task.ModifiedPass(true));
+            Assert.AreEqual(false, task.ModifiedPass(false));
+
+            task.ErrorCausesFail = true;
+            Assert.AreEqual(true, task.ModifiedPass(true));
+            Assert.AreEqual(false, task.ModifiedPass(false));
+        }
+
+        [Test]
+        public void TestPassFail_SingleErrorNoWarningsLogged()
+        {
+            BuildEngineStub buildEngine = new BuildEngineStub();
+            ExecParse task = new ExecParse();
+            task.BuildEngine = buildEngine;
+
+            task.Configuration = @"
+                <Error>
+                    <Search>b</Search>
+                </Error>";
+
+            string output = "abc";
+            task.ParseOutput(output);
+
+            Assert.AreEqual(1, buildEngine._errors.Count);
+            Assert.AreEqual(0, buildEngine._warnings.Count);
+
+            task.ErrorCausesFail = false;
+            Assert.AreEqual(true, task.ModifiedPass(true));
+            Assert.AreEqual(false, task.ModifiedPass(false));
+
+            task.ErrorCausesFail = true;
+            Assert.AreEqual(false, task.ModifiedPass(true));
+            Assert.AreEqual(false, task.ModifiedPass(false));
+        }
+
     }
 }
