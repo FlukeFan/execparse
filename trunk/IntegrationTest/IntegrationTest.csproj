@@ -64,6 +64,6 @@
   </PropertyGroup>
   <Target Name="CustomBuild">
     <Message Text="Start custom build ..." />
-    <ExecParse Command="type SubFolder\MyCustomOutput.txt" Configuration="$(ExecParseConfiguration)"/>
+    <ExecParse Command="type SubFolder\MyCustomOutput.txt" Configuration="$(ExecParseConfiguration)" ErrorCausesFail="true" />
   </Target>
 </Project>

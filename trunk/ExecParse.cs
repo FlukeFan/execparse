@@ -27,11 +27,18 @@ namespace ExecParse
         string          _output;
         string          _configuration;
         XmlDocument     _xmlConfiguration;
+        bool            _errorCausesFail;
 
         public string Configuration
         {
             get { return _configuration; }
             set { _configuration = value; }
+        }
+
+        public bool ErrorCausesFail
+        {
+            get { return _errorCausesFail; }
+            set { _errorCausesFail = value; }
         }
 
         protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
@@ -43,10 +50,10 @@ namespace ExecParse
         public override bool Execute()
         {
             _outputBuilder = new StringBuilder();
-            bool pass = base.Execute();
+            bool execPass = base.Execute();
 
             ParseOutput(_outputBuilder.ToString());
-            return pass;
+            return ModifiedPass(execPass);
         }
 
         private void LoadConfiguration()
@@ -160,6 +167,11 @@ namespace ExecParse
             ParseComplexElement("Error", new ComplexLog(Log.LogError));
             ParseComplexElement("Warning", new ComplexLog(Log.LogWarning));
             ParseMessages();
+        }
+
+        public bool ModifiedPass(bool originalPassed)
+        {
+            return originalPassed && (!_errorCausesFail || !Log.HasLoggedErrors);
         }
 
     }
