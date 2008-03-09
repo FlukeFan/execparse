@@ -1,0 +1,10 @@
+
+This file contains output to demonstrate using the ExecParse MSBuild task.
+
+myerror 1: line 4
+myerror 2: line missing
+
+mywarning 1: line 7
+
+mymessage: I got this message
+

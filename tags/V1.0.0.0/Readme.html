@@ -1,0 +1,223 @@
+<html>
+
+    <head>
+        <title>ExecParse Reference</title>
+        <style>
+            body {
+            	margin:0px;
+            	padding:0px;
+            	color:black;
+            	}
+
+            .content {
+            	margin:0px 100px 50px;
+            	padding:20px;
+            	color:black;
+            	background-color:#eee;
+            	border:1px solid black;
+            	}
+            p {
+            	font-size:11px;
+            	line-height:20px;
+            	font-family:verdana, arial, helvetica, sans-serif;
+            	margin:0px 0px 12px 0px;
+            	}
+            #Content>p {margin:0px;}
+            #Content>p+p {text-indent:30px;}
+
+            a {
+            	color:#09C;
+            	font-size:11px;
+            	font-weight:600;
+            	font-family:verdana, arial, helvetica, sans-serif;
+            	}
+            h1 {
+            	color:#333;
+            	font:20px/20px verdana, arial, helvetica, sans-serif;
+            	font-weight:900;
+            	}
+            h2 {
+            	color:#333;
+            	font:12px verdana, arial, helvetica, sans-serif;
+            	font-weight:700;
+            	margin:18px 0px 3px 0px;
+            	}
+            h3 {
+            	color:#666;
+            	font-size:11px;
+            	font-weight:800;
+            	margin:6px 0px 3px 0px;
+            	}
+            table {
+            	font-size:11px;
+            	line-height:20px;
+            	font-family:verdana, arial, helvetica, sans-serif;
+            	margin:0px 0px 12px 0px;
+                }
+            th {
+                font-style:italic;
+                }
+        </style>
+    </head>
+
+    <body>
+
+        <br>
+        <div class="content">
+
+            <h1>ExecParse Reference</h1>
+
+            <h2>Introduction</h2>
+
+            <p>
+                The ExecParse task works the same way as the Exec MSBuild task, also allowing the output to be parsed
+                and appropriate errors/warnings to be logged.
+            </p>
+
+            <h2>Parameters</h2>
+
+            <p>
+                The ExecParse task inherits from the MSBuild Exec task.  The parameters for the Exec task
+                can be found in the
+                <a target="ExecReference" href="http://msdn2.microsoft.com/en-us/library/x8zx72cd.aspx">Exec Task Reference</a>
+                on MSDN.
+            </p>
+
+            <p>
+                Additional parameters are:
+                <table>
+                    <tr align="left"><th width="30%">Parameter</th><th>Description</th></tr>
+                    <tr>
+                        <td><b>ErrorCausesFail</b></td>
+                        <td>
+                            Optional.  If set to true, any errors logged will cause the build to fail.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>Configuration</b></td>
+                        <td>
+                            Optional.  XML configuration of any errors/warnings/messages to be parsed.
+                        </td>
+                    </tr>
+                </table>
+            </p>
+
+            <p>
+                The Configuration parameter is used to describe a regular expression for finding text in the
+                output of the executed command, and replacements for logging.  Each element can be used multiple times.
+            </p>
+
+            <p>Error search configuration:
+    <pre>
+    &lt;Error>
+        &lt;Search><i>regular expression to search for</i>&lt;/Search>
+        &lt;ReplaceSearch><i>optional search to apply to the capture of the first search</i>&lt;/ReplaceSearch>
+        &lt;!-- The following (optional) tags contain any text replacements to use for each log item -->
+        &lt;Message><i></i>&lt;/Message>
+        &lt;Code>&lt;/Code>
+        &lt;File>&lt;/File>
+        &lt;HelpKeyword>&lt;/HelpKeyword>
+        &lt;Subcategory>&lt;/Subcategory>
+        &lt;LineNumber>&lt;/LineNumber>
+        &lt;EndLineNumber>&lt;/EndLineNumber>
+        &lt;ColumnNumber>&lt;/ColumnNumber>
+        &lt;EndColumnNumber>&lt;/EndColumnNumber>
+    &lt;/Error>
+    </pre></p>
+
+            <p>Warning search configuration:
+    <pre>
+    &lt;Warning>
+        &lt;Search><i>regular expression to search for</i>&lt;/Search>
+        &lt;ReplaceSearch><i>optional search to apply to the capture of the first search</i>&lt;/ReplaceSearch>
+        &lt;!-- The following (optional) tags contain any text replacements to use for each log item -->
+        &lt;Message><i></i>&lt;/Message>
+        &lt;Code>&lt;/Code>
+        &lt;File>&lt;/File>
+        &lt;HelpKeyword>&lt;/HelpKeyword>
+        &lt;Subcategory>&lt;/Subcategory>
+        &lt;LineNumber>&lt;/LineNumber>
+        &lt;EndLineNumber>&lt;/EndLineNumber>
+        &lt;ColumnNumber>&lt;/ColumnNumber>
+        &lt;EndColumnNumber>&lt;/EndColumnNumber>
+    &lt;/Warning>
+    </pre></p>
+
+            <p>Error search configuration:
+    <pre>
+    &lt;Message>
+        &lt;Search><i>regular expression to search for</i>&lt;/Search>
+        &lt;ReplaceSearch><i>optional search to apply to the capture of the first search</i>&lt;/ReplaceSearch>
+        &lt;!-- The following (optional) tags contain any text replacements to use for each log item -->
+        &lt;Message><i></i>&lt;/Message>
+        &lt;Importance>(High|Normal|Low)&lt;/Importance>
+    &lt;/Message>
+    </pre></p>
+
+            <p>
+                The 'Search' tag in each case uses a regular expression to locate text in the output of the executed command.
+                The regular expression can use group captures, and the group captures can be used in the replacements
+                that are logged.  If the regular expression uses look-ahead, then a second 'ReplaceSearch' can search within
+                the content of the original search.
+            </p>
+
+            <h2>Example usage</h2>
+
+            <ol>
+
+                <li>
+                    <p>Find all occurrences of the string "fail: '<i>my fail text</i>'", log an error with the message
+                    "Failure: <i>my fail text</i>", and if any errors are logged fail the build.
+    <pre>
+    &lt;PropertyGroup>
+        &lt;ExecParseConfiguration>
+            &lt;Error>
+                &lt;Search>fail: '(.*?)'&lt;/Search>
+                &lt;Message>Failure: $1&lt;/Message>
+            &lt;/Error>
+        &lt;/ExecParseConfiguration>
+    &lt;/PropertyGroup>
+    
+    &lt;Target Name="CustomBuildStep">
+        &lt;ExecParse Command="myCommand.exe" Configuration="$(ExecParseConfiguration)" ErrorCausesFail="true" />
+    &lt;/Target>
+    </pre></p>
+                </li>
+
+                <li>
+                    <p>Find all occurrences of the string "fail:<i>filename</i>:line <i>linenumber</i>", and log an error
+                    specifying the appropriate filename.
+    <pre>
+    &lt;PropertyGroup>
+        &lt;ExecParseConfiguration>
+            &lt;Error>
+                &lt;Search>fail:.*?:line \d*&lt;/Search>
+                &lt;ReplaceSearch>fail:(.*?):line (\d*)&lt;/ReplaceSearch>
+                &lt;Message>Failure in $1&lt;/Message>
+                &lt;File>$1&lt;/File>
+                &lt;LineNumber>$2&lt;/LineNumber>
+            &lt;/Error>
+        &lt;/ExecParseConfiguration>
+    &lt;/PropertyGroup>
+
+    &lt;Target Name="CustomBuildStep">
+        &lt;ExecParse Command="myCommand.exe" Configuration="$(ExecParseConfiguration)" ErrorCausesFail="true" />
+    &lt;/Target>
+    </pre></p>
+                </li>
+
+                <li>
+                    <p>A fully working example can be found in the following project accessible through Subversion:
+                    <a target="svnrepo" href="http://code.google.com/p/atlanta/source/checkout">Google Code Project</a><p>
+
+                    <p>Or examine the contents of the
+                    <a target="projfile" href="http://atlanta.googlecode.com/svn/trunk/Atlanta.csproj">project file</a>
+                    directly.</p>
+                </li>
+            </ol>
+
+        </div>
+
+    </body>
+
+</html>

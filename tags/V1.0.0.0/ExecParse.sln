@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual C# Express 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecParse", "ExecParse.csproj", "{DC92BD7C-6EC8-4BA6-9BC0-955BD827DD29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecParse.Test", "Test\ExecParse.Test.csproj", "{75CE6F74-D301-426F-8482-D8175C437DAB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DC92BD7C-6EC8-4BA6-9BC0-955BD827DD29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC92BD7C-6EC8-4BA6-9BC0-955BD827DD29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC92BD7C-6EC8-4BA6-9BC0-955BD827DD29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC92BD7C-6EC8-4BA6-9BC0-955BD827DD29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75CE6F74-D301-426F-8482-D8175C437DAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75CE6F74-D301-426F-8482-D8175C437DAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75CE6F74-D301-426F-8482-D8175C437DAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75CE6F74-D301-426F-8482-D8175C437DAB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
