@@ -8,4 +8,5 @@ RMDIR /Q /S %PackageFolder%
 MKDIR %PackageFolder%
 
 COPY licence.txt %PackageFolder%
+COPY Readme.html %PackageFolder%
 COPY bin\Release\ExecParse.dll %PackageFolder%
