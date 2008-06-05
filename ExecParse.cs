@@ -26,6 +26,7 @@ namespace ExecParse
         StringBuilder   _outputBuilder;
         string          _output;
         string          _configuration;
+        bool            _debug;
         XmlDocument     _xmlConfiguration;
         bool            _errorCausesFail;
 
@@ -35,10 +36,22 @@ namespace ExecParse
             set { _configuration = value; }
         }
 
+        public bool Debug
+        {
+            get { return _debug; }
+            set { _debug = value; }
+        }
+
         public bool ErrorCausesFail
         {
             get { return _errorCausesFail; }
             set { _errorCausesFail = value; }
+        }
+
+        private void LogDebug(string message)
+        {
+            if (_debug)
+                Log.LogMessage(message);
         }
 
         protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
@@ -99,6 +112,7 @@ namespace ExecParse
         private void ParseComplexElement(string elementName, ComplexLog log)
         {
             XmlNodeList elements = _xmlConfiguration.SelectNodes("xml/" + elementName);
+            LogDebug("Parsing " + elementName + ", " + elements.Count.ToString() + " nodes");
             foreach (XmlElement element in elements)
             {
                 Regex search = ExtractSearch(element);
@@ -113,9 +127,11 @@ namespace ExecParse
                 string columnNumberReplacement = ExtractReplacement(element, "ColumnNumber");
                 string endColumnNumberReplacement = ExtractReplacement(element, "EndColumnNumber");
                 MatchCollection matches = search.Matches(_output);
+                LogDebug("Matched (" + search.ToString() + ") " + matches.Count.ToString() + " times");
 
                 foreach (Match match in matches)
                 {
+                    LogDebug("Processing:(" + match.Value + ")");
                     string message = (messageReplacement == null) ? string.Empty : replaceSearch.Replace(match.Value, messageReplacement);
                     string code = (codeReplacement == null) ? string.Empty : replaceSearch.Replace(match.Value, codeReplacement);
                     string file = (fileReplacement == null) ? string.Empty : replaceSearch.Replace(match.Value, fileReplacement);
@@ -141,6 +157,7 @@ namespace ExecParse
         private void ParseMessages()
         {
             XmlNodeList elements = _xmlConfiguration.SelectNodes("xml/Message");
+            LogDebug("Parsing messages, " + elements.Count.ToString() + " nodes");
             foreach (XmlElement element in elements)
             {
                 Regex search = ExtractSearch(element);
@@ -148,9 +165,12 @@ namespace ExecParse
                 string messageReplacement = ExtractReplacement(element, "Message");
                 string importanceReplacement = ExtractReplacement(element, "Importance");
                 MatchCollection matches = search.Matches(_output);
+                LogDebug("Found " + matches.Count.ToString() + " matches");
+                LogDebug("Matched (" + search.ToString() + ") " + matches.Count.ToString() + " times");
 
                 foreach (Match match in matches)
                 {
+                    LogDebug("Processing:(" + match.Value + ")");
                     string message = (messageReplacement == null) ? string.Empty : replaceSearch.Replace(match.Value, messageReplacement);
                     MessageImportance importance = string.IsNullOrEmpty(importanceReplacement) ? MessageImportance.Low : (MessageImportance)Enum.Parse(typeof(MessageImportance), replaceSearch.Replace(match.Value, importanceReplacement), true);
 
@@ -162,11 +182,14 @@ namespace ExecParse
         public void ParseOutput(string outputFromExecution)
         {
             _output = outputFromExecution;
+            LogDebug("Loading configuration");
             LoadConfiguration();
 
+            LogDebug("Post processing output");
             ParseComplexElement("Error", new ComplexLog(Log.LogError));
             ParseComplexElement("Warning", new ComplexLog(Log.LogWarning));
             ParseMessages();
+            LogDebug("Completed post processing");
         }
 
         public bool ModifiedPass(bool originalPassed)
